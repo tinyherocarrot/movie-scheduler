@@ -19,6 +19,7 @@ class App extends Component {
   state = {
     movieName: "",
     movieDuration: "",
+    cinema: "",
     showTimes: []
   };
 
@@ -32,29 +33,30 @@ class App extends Component {
       "value",
       snap => {
         let snapValues = snap.val();
+        if (snapValues) {
+          let data = [];
+          Object.keys(snapValues).forEach((key, i) => {
+            let movie = snapValues[key];
+            let newRow = {
+              name: movie.movieName,
+              monday: movie.showTimes.weekday.join(" \n "),
+              tuesday: movie.showTimes.weekday.join(" \n "),
+              wednesday: movie.showTimes.weekday.join(" \n "),
+              thursday: movie.showTimes.weekday.join(" \n "),
+              friday: movie.showTimes.weekend.join(" \n "),
+              saturday: movie.showTimes.weekend.join(" \n "),
+              sunday: movie.showTimes.weekend.join(" \n "),
+              key: i
+            };
+            data.push(newRow);
+          });
 
+          this.setState({
+            showTimes: data
+          });
+        }
         // push snap values into an array, then setState
         // ---------------------------------------------
-        let data = [];
-        Object.keys(snapValues).forEach((key, i) => {
-          let movie = snapValues[key];
-          let newRow = {
-            name: movie.movieName,
-            monday: movie.showTimes.weekday.join(" \n "),
-            tuesday: movie.showTimes.weekday.join(" \n "),
-            wednesday: movie.showTimes.weekday.join(" \n "),
-            thursday: movie.showTimes.weekday.join(" \n "),
-            friday: movie.showTimes.weekend.join(" \n "),
-            saturday: movie.showTimes.weekend.join(" \n "),
-            sunday: movie.showTimes.weekend.join(" \n "),
-            key: i
-          };
-          data.push(newRow);
-        });
-
-        this.setState({
-          showTimes: data
-        });
       },
       errorObject => {
         console.log("The read failed: " + errorObject.code);
@@ -104,6 +106,17 @@ class App extends Component {
       <div>
         <h1>Welcome to Movie Scheduler!</h1>
         <form onSubmit={this.handleFormSubmit}>
+          <select
+            value={this.state.cinema}
+            onChange={this.handleInputChange}
+            name="cinema"
+          >
+            <option disabled="disabled">Please select a cinema</option>
+            <option value="cinema_1">cinema_1</option>
+            <option value="cinema_2">cinema_2</option>
+          </select>{" "}
+          <br />
+          <br />
           Movie Name:<br />
           <input
             type="text"
