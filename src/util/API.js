@@ -35,7 +35,8 @@ var schedule = (openingTime, closingTime, movieDuration) => {
     // if the calculated showtime is valid (not before actual openingTime),
     if (showTime.isAfter(actual_open)) {
       // then add on the calculated showtime
-      console.log(`hey whatup`);
+      console.log(`hey whatup
+      `);
       res.unshift(showTime.format("HH:mm"));
     }
 

@@ -21,23 +21,18 @@ class App extends Component {
   };
 
   componentDidMount = () => {
-    console.log();
-
     const rootRef = firebase
       .database()
       .ref()
-      .child("cinema");
-    const scheduleRef = rootRef.child("showTimes");
-    scheduleRef.on("value", snap => {
+      .child("cinema1");
+    const cinemaRef = rootRef.child("cinema1");
+    cinemaRef.on("value", snap => {
       console.log(snap.val());
 
       this.setState({
         showTimes: snap.val()
       });
     });
-    // this.setState({
-
-    // })
   };
 
   handleInputChange = event => {
@@ -48,12 +43,9 @@ class App extends Component {
   handleFormSubmit = event => {
     event.preventDefault();
 
-    // const newMovie = {
-    //   movieName: this.state.movieName,
-    //   movieDuration: this.state.movieDuration
-    // };
-
-    this.setState({
+    let newMovie = {
+      movieName: this.state.movieName,
+      movieDuration: this.state.movieDuration,
       showTimes: API.fullSchedule(
         11,
         23,
@@ -61,14 +53,21 @@ class App extends Component {
         24,
         parseInt(this.state.movieDuration)
       )
-    });
+    };
+    const rootRef = firebase
+      .database()
+      .ref()
+      .child("cinema1");
+    console.log(newMovie);
+    let _movieName = this.state.movieName;
+    rootRef.child(_movieName).set(newMovie);
   };
 
   render() {
     return (
       <div>
         <h1>Welcome to Movie Scheduler!</h1>
-        <form onClick={this.handleFormSubmit}>
+        <form onSubmit={this.handleFormSubmit}>
           Movie Name:<br />
           <input
             type="text"
