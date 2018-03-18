@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import Table from "./components/Table";
+
 import API from "./util/API";
 import * as firebase from "firebase";
 
@@ -17,7 +19,7 @@ class App extends Component {
   state = {
     movieName: "",
     movieDuration: "",
-    showTimes: ""
+    showTimes: []
   };
 
   componentDidMount = () => {
@@ -25,14 +27,39 @@ class App extends Component {
       .database()
       .ref()
       .child("cinema1");
-    const cinemaRef = rootRef.child("cinema1");
-    cinemaRef.on("value", snap => {
-      console.log(snap.val());
+    // const cinemaRef = rootRef.child("cinema1");
+    rootRef.on(
+      "value",
+      snap => {
+        let snapValues = snap.val();
 
-      this.setState({
-        showTimes: snap.val()
-      });
-    });
+        // push snap values into an array, then setState
+        // ---------------------------------------------
+        let data = [];
+        Object.keys(snapValues).forEach((key, i) => {
+          let movie = snapValues[key];
+          let newRow = {
+            name: movie.movieName,
+            monday: movie.showTimes.weekday.join(" \n "),
+            tuesday: movie.showTimes.weekday.join(" \n "),
+            wednesday: movie.showTimes.weekday.join(" \n "),
+            thursday: movie.showTimes.weekday.join(" \n "),
+            friday: movie.showTimes.weekend.join(" \n "),
+            saturday: movie.showTimes.weekend.join(" \n "),
+            sunday: movie.showTimes.weekend.join(" \n "),
+            key: i
+          };
+          data.push(newRow);
+        });
+
+        this.setState({
+          showTimes: data
+        });
+      },
+      errorObject => {
+        console.log("The read failed: " + errorObject.code);
+      }
+    );
   };
 
   handleInputChange = event => {
@@ -43,6 +70,7 @@ class App extends Component {
   handleFormSubmit = event => {
     event.preventDefault();
 
+    // capture form data, create newMovie obj
     let newMovie = {
       movieName: this.state.movieName,
       movieDuration: this.state.movieDuration,
@@ -54,13 +82,21 @@ class App extends Component {
         parseInt(this.state.movieDuration)
       )
     };
+    console.log(newMovie);
+
+    // push newMovie to cinema1 node in Firebase DB
     const rootRef = firebase
       .database()
       .ref()
       .child("cinema1");
-    console.log(newMovie);
     let _movieName = this.state.movieName;
     rootRef.child(_movieName).set(newMovie);
+
+    // clear form
+    this.setState({
+      movieName: "",
+      movieDuration: ""
+    });
   };
 
   render() {
@@ -73,7 +109,6 @@ class App extends Component {
             type="text"
             name="movieName"
             value={this.state.movieName}
-            placeholder="Inception"
             onChange={this.handleInputChange}
           />
           <br />
@@ -82,14 +117,17 @@ class App extends Component {
             type="text"
             name="movieDuration"
             value={this.state.movieDuration}
-            placeholder="120"
             onChange={this.handleInputChange}
           />
           <br />
           <button onClick={this.handleFormSubmit}> Add Movie</button>
         </form>
-
-        <p> {JSON.stringify(this.state.showTimes, null, 2)} </p>
+        <br />
+        {this.state.showTimes.length ? (
+          <Table data={this.state.showTimes} />
+        ) : (
+          "Loading Showtimes..."
+        )}
       </div>
     );
   }
