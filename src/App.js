@@ -1,5 +1,17 @@
 import React, { Component } from "react";
 import API from "./util/API";
+import * as firebase from "firebase";
+
+// Initialize Firebase
+var config = {
+  apiKey: "AIzaSyAfE4ydC1Zk-UAQWnZnhS7bCeRWeG0V3LU",
+  authDomain: "movie-schedule-automate.firebaseapp.com",
+  databaseURL: "https://movie-schedule-automate.firebaseio.com",
+  projectId: "movie-schedule-automate",
+  storageBucket: "movie-schedule-automate.appspot.com",
+  messagingSenderId: "465397375050"
+};
+firebase.initializeApp(config);
 
 class App extends Component {
   state = {
@@ -9,7 +21,23 @@ class App extends Component {
   };
 
   componentDidMount = () => {
-    console.log(API.fullSchedule);
+    console.log();
+
+    const rootRef = firebase
+      .database()
+      .ref()
+      .child("cinema");
+    const scheduleRef = rootRef.child("showTimes");
+    scheduleRef.on("value", snap => {
+      console.log(snap.val());
+
+      this.setState({
+        showTimes: snap.val()
+      });
+    });
+    // this.setState({
+
+    // })
   };
 
   handleInputChange = event => {
