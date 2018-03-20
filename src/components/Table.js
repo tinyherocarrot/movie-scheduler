@@ -8,7 +8,7 @@ const columns = [
     title: "Movie",
     dataIndex: "name",
     key: "name",
-    width: 50,
+    width: 100,
     align: "center"
   },
   {
@@ -70,7 +70,6 @@ const columns = [
 ];
 
 const BodyRow = styled.tr`
-  margin-bottom: 1em;
   &:hover {
     background: lightgrey !important;
   }
