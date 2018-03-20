@@ -8,10 +8,16 @@ const StyledSpan = styled.span`
 `;
 
 class ExpandButton extends Component {
+  handleClick = () => {
+    this.props.handleCollapse();
+  };
+
   render() {
     return (
-      <StyledSpan>
-        <a>{this.props.collapsed ? "+" : "-"}</a>
+      <StyledSpan onClick={this.handleClick}>
+        <a>
+          {this.props.name} {this.props.collapsed ? "+" : "-"}
+        </a>
       </StyledSpan>
     );
   }

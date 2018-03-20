@@ -85,12 +85,10 @@ class App extends Component {
   };
 
   handleCollapse = () => {
-    console.log(`before ${this.state.newCinemaCollapsed}`);
     let collapsed = !this.state.newCinemaCollapsed;
     this.setState({
       newCinemaCollapsed: collapsed
     });
-    console.log(`after ${this.state.newCinemaCollapsed}`);
   };
 
   handleInputChange = event => {
@@ -171,14 +169,14 @@ class App extends Component {
     return (
       <Container>
         <h1>Welcome to Movie Scheduler!</h1>
-        <form onSubmit={this.handleFormSubmit}>
-          <h3>
-            Add a New Cinema{" "}
-            <ExpandButton
-              collapsed={this.state.newCinemaCollapsed}
-              onClick={this.handleCollapse}
-            />
-          </h3>
+        <h3>
+          <ExpandButton
+            name="Add a New Cinema"
+            collapsed={this.state.newCinemaCollapsed}
+            handleCollapse={this.handleCollapse}
+          />
+        </h3>
+        <form onSubmit={this.handleFormSubmit} styles={{ display: "none " }}>
           Cinema Name:<br />
           <input
             type="text"
