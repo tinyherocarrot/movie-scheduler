@@ -8,7 +8,7 @@ const columns = [
     title: "Movie",
     dataIndex: "name",
     key: "name",
-    width: 100,
+    width: 150,
     align: "center"
   },
   {
@@ -61,15 +61,17 @@ const columns = [
     align: "center"
   },
   {
-    title: "Operations",
+    title: "Options",
     dataIndex: "",
-    key: "operations",
+    key: "options",
     align: "center",
+    width: 100,
     render: () => <a href="#">Remove</a>
   }
 ];
 
 const BodyRow = styled.tr`
+  color: white;
   &:hover {
     background: lightgrey !important;
   }

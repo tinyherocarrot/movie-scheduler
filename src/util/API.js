@@ -1,8 +1,9 @@
 import moment from "moment";
+// var moment = require("moment"); // for backwards compability testing
 
 // This function takes in an opening and closing time, and duration of the movie,
 // and outputs an array of showtimes, as according to the cinema's guidelines (see below)
-var schedule = (openingTime, closingTime, movieDuration) => {
+const schedule = (openingTime, closingTime, movieDuration) => {
   // hardcode opening and closing times, for now
   let open = moment({
     hour: openingTime
@@ -49,19 +50,55 @@ var schedule = (openingTime, closingTime, movieDuration) => {
 
 // This function takes in cinema's weekday and weekend hours of operation, and a movie's duration,
 // and outputs an object containing arrays of weekday and weekend showtimes.
+const fullSchedule = (
+  wkdyOpen,
+  wkdyClose,
+  wkndOpen,
+  wkndClose,
+  movieDuration
+) => {
+  return {
+    weekday: schedule(wkdyOpen, wkdyClose, movieDuration),
+    weekend: schedule(wkndOpen, wkndClose, movieDuration)
+  };
+};
+
+// This function takes two sets of opening/closing times,
+// and checks if they are valid opening/closing times.
+const validateNewCinema = (wkdyOpen, wkdyClose, wkndOpen, wkndClose) => {
+  let _wkdyOpen = moment({
+    hour: wkdyOpen
+  });
+  let _wkdyClose = moment({
+    hour: wkdyClose
+  });
+  let _wkndOpen = moment({
+    hour: wkndOpen
+  });
+  let _wkndClose = moment({
+    hour: wkndClose
+  });
+
+  return _wkdyOpen.isBefore(_wkdyClose) && _wkndOpen.isBefore(_wkndClose);
+};
+
 export default {
-  fullSchedule: (wkdyOpen, wkdyClose, wkndOpen, wkndClose, movieDuration) => {
-    return {
-      weekday: schedule(wkdyOpen, wkdyClose, movieDuration),
-      weekend: schedule(wkndOpen, wkndClose, movieDuration)
-    };
-  }
+  fullSchedule: fullSchedule,
+  validateNewCinema: validateNewCinema
 };
 
 // Test Case #1
 // console.log(fullSchedule(11, 23, 10.5, 24, 86));
 // ---> expected output: { weekday: [ '13:10', '15:15', '17:20', '19:25', '21:30' ],
 //                         weekend: [ '12:05', '14:10', '16:15', '18:20', '20:25', '22:30' ] }
+
+// Test Case #2
+// console.log(validateNewCinema(11, 23, 10.5, 24));
+// ---> expected output: true
+
+// Test Case #2
+// console.log(validateNewCinema(11, 11, 10.5, 10));
+// ---> expected output: false
 
 // ====================================  Requirements ==================================== //
 // - Each movie should start at easy to read times (eg 10:00, 10:05, 10:10).

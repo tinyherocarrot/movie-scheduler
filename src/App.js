@@ -1,10 +1,14 @@
 import React, { Component } from "react";
-import Table from "./components/Table";
-
-import API from "./util/API";
 import * as firebase from "firebase";
+
+import Table from "./components/Table";
 import Container from "./components/Container";
 import ExpandButton from "./components/ExpandButton";
+import FormContainer from "./components/FormContainer";
+import TimePicker from "./components/TimePicker";
+import TextInput from "./components/TextInput";
+
+import API from "./util/API";
 
 // Initialize Firebase
 var config = {
@@ -24,10 +28,10 @@ class App extends Component {
     movieDuration: "",
     selectedCinema: "",
     cinemaName: "",
-    weekdayOpenTime: "",
-    weekdayCloseTime: "",
-    weekendOpenTime: "",
-    weekendCloseTime: "",
+    wkdyOpen: "",
+    wkdyClose: "",
+    wkndOpen: "",
+    wkndClose: "",
     cinemasList: [],
     showTimes: []
   };
@@ -96,12 +100,16 @@ class App extends Component {
     this.setState({ [name]: value });
   };
 
+  handleTimeChange = e => {
+    console.log("line 103: ", e);
+  };
+
   addNewCinema = () => {
     let newCinema = {
-      weekdayOpenTime: this.state.weekdayOpenTime,
-      weekdayCloseTime: this.state.weekdayCloseTime,
-      weekendOpenTime: this.state.weekendOpenTime,
-      weekendCloseTime: this.state.weekendCloseTime
+      wkdyOpen: this.state.wkdyOpen,
+      wkdyClose: this.state.wkdyClose,
+      wkndOpen: this.state.wkndOpen,
+      wkndClose: this.state.wkndClose
     };
     console.log(newCinema);
 
@@ -128,10 +136,10 @@ class App extends Component {
       movieName: this.state.movieName,
       movieDuration: this.state.movieDuration,
       showTimes: API.fullSchedule(
-        cinemaHours.weekdayOpenTime,
-        cinemaHours.weekdayCloseTime,
-        cinemaHours.weekendOpenTime,
-        cinemaHours.weekendCloseTime,
+        cinemaHours.wkdyOpen,
+        cinemaHours.wkdyClose,
+        cinemaHours.wkndOpen,
+        cinemaHours.wkndClose,
         parseInt(this.state.movieDuration)
       )
     };
@@ -155,7 +163,17 @@ class App extends Component {
     event.preventDefault();
     switch (event.target.value) {
       case "add-cinema":
-        this.addNewCinema();
+        if (
+          API.validateNewCinema(
+            this.state.wkdyOpen,
+            this.state.wkdyClose,
+            this.state.wkndOpen,
+            this.state.wkndClose
+          )
+        ) {
+          this.addNewCinema();
+        } else {
+        }
         break;
       case "add-movie":
         this.addNewMovie();
@@ -167,115 +185,102 @@ class App extends Component {
 
   render() {
     return (
-      <Container>
-        <h1>Welcome to Movie Scheduler!</h1>
-        <h3>
-          <ExpandButton
-            name="Add a New Cinema"
-            collapsed={this.state.newCinemaCollapsed}
-            handleCollapse={this.handleCollapse}
-          />
-        </h3>
-        <form onSubmit={this.handleFormSubmit} styles={{ display: "none " }}>
-          Cinema Name:<br />
-          <input
-            type="text"
-            name="cinemaName"
-            value={this.state.cinemaName}
-            onChange={this.handleInputChange}
-          />
-          <br />
-          Weekday Opening Time: <br />
-          <input
-            type="text"
-            name="weekdayOpenTime"
-            value={this.state.weekdayOpenTime}
-            onChange={this.handleInputChange}
-          />
-          <br />
-          Weekday Closing Time: <br />
-          <input
-            type="text"
-            name="weekdayCloseTime"
-            value={this.state.weekdayCloseTime}
-            onChange={this.handleInputChange}
-          />
-          <br />
-          Weekend Opening Time: <br />
-          <input
-            type="text"
-            name="weekendOpenTime"
-            value={this.state.weekendOpenTime}
-            onChange={this.handleInputChange}
-          />
-          <br />
-          Weekend Closing Time: <br />
-          <input
-            type="text"
-            name="weekendCloseTime"
-            value={this.state.weekendCloseTime}
-            onChange={this.handleInputChange}
-          />
-          <br />
-          <button onClick={this.handleFormSubmit} value="add-cinema">
-            {" "}
-            Add Cinema
-          </button>
-        </form>{" "}
-        <br />
-        <form onSubmit={this.handleFormSubmit}>
+      <div>
+        <Container>
+          <h1>Welcome to Movie Scheduler!</h1>
+          <h3>
+            <ExpandButton
+              name="Add a New Cinema"
+              collapsed={this.state.newCinemaCollapsed}
+              handleCollapse={this.handleCollapse}
+            />
+          </h3>
+          <FormContainer collapsed={this.state.newCinemaCollapsed}>
+            <form onSubmit={this.handleFormSubmit}>
+              Cinema Name:<br />
+              <TextInput
+                type="text"
+                name="cinemaName"
+                value={this.state.cinemaName}
+                onChange={this.handleInputChange}
+              />
+              <br />
+              Weekday Opening Time: <br />
+              <TimePicker onChange={this.handleInputChange} name="wkdyOpen" />
+              <br />
+              Weekday Closing Time: <br />
+              <TimePicker onChange={this.handleInputChange} name="wkdyClose" />
+              <br />
+              Weekend Opening Time: <br />
+              <TimePicker onChange={this.handleInputChange} name="wkndOpen" />
+              <br />
+              Weekend Closing Time: <br />
+              <TimePicker onChange={this.handleInputChange} name="wkndClose" />
+              <br />
+              <button onClick={this.handleFormSubmit} value="add-cinema">
+                {" "}
+                Add Cinema
+              </button>
+            </form>{" "}
+          </FormContainer>
           <h3>Add a New Movie</h3>
-          <select
-            defaultValue={this.state.selectedCinema}
-            onChange={this.handleInputChange}
-            name="selectedCinema"
-          >
-            <option disabled="disabled" value="prompt">
-              Please select a cinema
-            </option>
-            {Object.keys(this.state.cinemasList).map((cinema, i) => {
-              return (
-                <option key={i} value={cinema}>
-                  {cinema}
+          <FormContainer>
+            <form onSubmit={this.handleFormSubmit}>
+              <select
+                defaultValue={this.state.selectedCinema}
+                onChange={this.handleInputChange}
+                name="selectedCinema"
+              >
+                <option disabled="disabled" value="prompt">
+                  Please select a cinema
                 </option>
-              );
-            })}
-          </select>{" "}
-          <br />
-          <br />
-          Movie Name:<br />
-          <input
-            type="text"
-            name="movieName"
-            value={this.state.movieName}
-            onChange={this.handleInputChange}
-          />
-          <br />
-          Duration: (min)<br />
-          <input
-            type="text"
-            name="movieDuration"
-            value={this.state.movieDuration}
-            onChange={this.handleInputChange}
-          />
-          <br />
-          <button onClick={this.handleFormSubmit} value="add-movie">
-            {" "}
-            Add Movie
-          </button>
-        </form>
-        <br />
-        {this.state.showTimes
-          ? Object.keys(this.state.showTimes).map((cinema, i) => {
-              return (
-                <div key={i}>
-                  <h4>{cinema} Showtimes</h4>
-                  <Table data={this.state.showTimes[cinema]} />
-                </div>
-              );
-            })
-          : "Loading Showtimes..."}
-      </Container>
+                {Object.keys(this.state.cinemasList).map((cinema, i) => {
+                  return (
+                    <option key={i} value={cinema}>
+                      {cinema}
+                    </option>
+                  );
+                })}
+              </select>{" "}
+              <br />
+              <br />
+              Movie Name:<br />
+              <TextInput
+                type="text"
+                name="movieName"
+                value={this.state.movieName}
+                onChange={this.handleInputChange}
+              />
+              <br />
+              Duration: (min)<br />
+              <TextInput
+                type="text"
+                name="movieDuration"
+                value={this.state.movieDuration}
+                onChange={this.handleInputChange}
+              />
+              <br />
+              <button onClick={this.handleFormSubmit} value="add-movie">
+                {" "}
+                Add Movie
+              </button>
+            </form>
+          </FormContainer>
+        </Container>
+
+        <Container background="grey">
+          {this.state.showTimes
+            ? Object.keys(this.state.showTimes).map((cinema, i) => {
+                return (
+                  <Container key={i}>
+                    <h4>{cinema} Showtimes</h4>
+                    <Table data={this.state.showTimes[cinema]} />
+                  </Container>
+                );
+              })
+            : "Loading Showtimes..."}
+        </Container>
+      </div>
     );
   }
 }
