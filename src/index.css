@@ -2,4 +2,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  /* color: white; */
+  background-image: url("ceystalhorizon.png");
+  background-repeat: no-repeat;
+  background-color: rgb(8, 10, 52);
 }

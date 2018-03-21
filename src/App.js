@@ -1,12 +1,15 @@
-import React, { Component } from "react";
+import React from "react";
+
 import * as firebase from "firebase";
 
 import Table from "./components/Table";
 import Container from "./components/Container";
-import ExpandButton from "./components/ExpandButton";
 import FormContainer from "./components/FormContainer";
+import FlexContainer from "./components/FlexContainer";
 import TimePicker from "./components/TimePicker";
 import TextInput from "./components/TextInput";
+import Button from "./components/Button";
+import PageContainer from "./components/PageContainer";
 
 import API from "./util/API";
 
@@ -21,19 +24,19 @@ var config = {
 };
 firebase.initializeApp(config);
 
-class App extends Component {
+class App extends React.Component {
   state = {
-    newCinemaCollapsed: true,
     movieName: "",
     movieDuration: "",
     selectedCinema: "",
     cinemaName: "",
-    wkdyOpen: "",
-    wkdyClose: "",
-    wkndOpen: "",
-    wkndClose: "",
-    cinemasList: [],
-    showTimes: []
+    wkdyOpen: "12:00",
+    wkdyClose: "12:00",
+    wkndOpen: "12:00",
+    wkndClose: "12:00",
+    cinemasList: {},
+    showTimes: {},
+    isShowingModal: false
   };
 
   componentDidMount = () => {
@@ -41,9 +44,10 @@ class App extends Component {
     rootRef.on("value", snap => {
       if (snap.hasChild("cinemas")) {
         console.log("wow you have cinemas!");
-        // writeCinemas(snapValues.cinemas)
+        let _cinemasList = snap.child("cinemas").val();
         this.setState({
-          cinemasList: snap.child("cinemas").val()
+          cinemasList: _cinemasList,
+          selectedCinema: Object.keys(_cinemasList)[0]
         });
       } else {
         console.log("no cinemas found :(");
@@ -159,6 +163,13 @@ class App extends Component {
     });
   };
 
+  noCinemasFound = () => {
+    let rootRef = firebase.database().ref();
+    rootRef.child("cinemas").once("value", snapshot => {
+      return snapshot.val() === null;
+    });
+  };
+
   handleFormSubmit = event => {
     event.preventDefault();
     switch (event.target.value) {
@@ -171,8 +182,15 @@ class App extends Component {
             this.state.wkndClose
           )
         ) {
-          this.addNewCinema();
+          if (this.state.cinemaName) {
+            this.addNewCinema();
+          } else {
+            // alert user to enter a cinema name
+            console.log("not a valid cinema name!");
+          }
         } else {
+          // alert user invalid times
+          console.log("not a valid cinema time!");
         }
         break;
       case "add-movie":
@@ -185,46 +203,11 @@ class App extends Component {
 
   render() {
     return (
-      <div>
-        <Container>
-          <h1>Welcome to Movie Scheduler!</h1>
-          <h3>
-            <ExpandButton
-              name="Add a New Cinema"
-              collapsed={this.state.newCinemaCollapsed}
-              handleCollapse={this.handleCollapse}
-            />
-          </h3>
-          <FormContainer collapsed={this.state.newCinemaCollapsed}>
-            <form onSubmit={this.handleFormSubmit}>
-              Cinema Name:<br />
-              <TextInput
-                type="text"
-                name="cinemaName"
-                value={this.state.cinemaName}
-                onChange={this.handleInputChange}
-              />
-              <br />
-              Weekday Opening Time: <br />
-              <TimePicker onChange={this.handleInputChange} name="wkdyOpen" />
-              <br />
-              Weekday Closing Time: <br />
-              <TimePicker onChange={this.handleInputChange} name="wkdyClose" />
-              <br />
-              Weekend Opening Time: <br />
-              <TimePicker onChange={this.handleInputChange} name="wkndOpen" />
-              <br />
-              Weekend Closing Time: <br />
-              <TimePicker onChange={this.handleInputChange} name="wkndClose" />
-              <br />
-              <button onClick={this.handleFormSubmit} value="add-cinema">
-                {" "}
-                Add Cinema
-              </button>
-            </form>{" "}
-          </FormContainer>
-          <h3>Add a New Movie</h3>
+      <PageContainer>
+        <h1>Welcome to Movie Scheduler!</h1>
+        <FlexContainer>
           <FormContainer>
+            <h2>Add a New Movie</h2>
             <form onSubmit={this.handleFormSubmit}>
               <select
                 defaultValue={this.state.selectedCinema}
@@ -260,27 +243,60 @@ class App extends Component {
                 onChange={this.handleInputChange}
               />
               <br />
-              <button onClick={this.handleFormSubmit} value="add-movie">
-                {" "}
+              <Button onClick={this.handleFormSubmit} value="add-movie">
                 Add Movie
-              </button>
+              </Button>
             </form>
           </FormContainer>
-        </Container>
-
-        <Container background="grey">
-          {this.state.showTimes
-            ? Object.keys(this.state.showTimes).map((cinema, i) => {
-                return (
-                  <Container key={i}>
-                    <h4>{cinema} Showtimes</h4>
+          <FormContainer collapsed={false}>
+            <h2>Add a New Cinema</h2>
+            <form onSubmit={this.handleFormSubmit}>
+              Cinema Name:<br />
+              <TextInput
+                type="text"
+                name="cinemaName"
+                value={this.state.cinemaName}
+                onChange={this.handleInputChange}
+              />
+              <br />
+              Weekday Opening Time: <br />
+              <TimePicker onChange={this.handleInputChange} name="wkdyOpen" />
+              <br />
+              Weekday Closing Time: <br />
+              <TimePicker onChange={this.handleInputChange} name="wkdyClose" />
+              <br />
+              Weekend Opening Time: <br />
+              <TimePicker onChange={this.handleInputChange} name="wkndOpen" />
+              <br />
+              Weekend Closing Time: <br />
+              <TimePicker onChange={this.handleInputChange} name="wkndClose" />
+              <br />
+              <Button onClick={this.handleFormSubmit} value="add-cinema">
+                {" "}
+                Add Cinema
+              </Button>
+            </form>
+          </FormContainer>
+        </FlexContainer>
+        <Container fill="true">
+          {Object.keys(this.state.cinemasList).length ? (
+            Object.keys(this.state.cinemasList).map((cinema, i) => {
+              return (
+                <Container key={i}>
+                  <h3>{cinema} Showtimes</h3>
+                  {Object.keys(this.state.cinemasList).length ? (
                     <Table data={this.state.showTimes[cinema]} />
-                  </Container>
-                );
-              })
-            : "Loading Showtimes..."}
+                  ) : (
+                    `No showtimes yet for ${cinema}`
+                  )}
+                </Container>
+              );
+            })
+          ) : (
+            <p>Add a cinema to begin</p>
+          )}
         </Container>
-      </div>
+      </PageContainer>
     );
   }
 }

@@ -57,6 +57,7 @@ const fullSchedule = (
   wkndClose,
   movieDuration
 ) => {
+  debugger;
   return {
     weekday: schedule(wkdyOpen, wkdyClose, movieDuration),
     weekend: schedule(wkndOpen, wkndClose, movieDuration)

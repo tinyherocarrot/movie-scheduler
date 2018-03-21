@@ -73,7 +73,9 @@ const columns = [
 const BodyRow = styled.tr`
   color: white;
   &:hover {
-    background: lightgrey !important;
+    background: papayawhip !important;
+    color: rgb(8, 10, 52);
+    border-radius: 0.5em;
   }
 `;
 
