@@ -52,7 +52,12 @@ class App extends Component {
     const cinemaRef = rootRef.child("cinemas");
     cinemaRef.on("value", snap => {
       let _cinemasList = snap.val();
-      if (_cinemasList !== null) {
+      if (_cinemasList === null) {
+        this.setState({
+          cinemasList: {},
+          selectedCinema: ""
+        });
+      } else {
         console.log("wow you have cinemas!");
         this.setState({
           cinemasList: _cinemasList,
@@ -65,7 +70,11 @@ class App extends Component {
     const showTimesRef = rootRef.child("showTimes");
     showTimesRef.on("value", snap => {
       let snapValues = snap.val();
-      if (snapValues !== null) {
+      if (snapValues === null) {
+        this.setState({
+          showTimes: {}
+        });
+      } else {
         let data = {};
         Object.keys(snapValues).forEach((cinema, i) => {
           let cinemaShowTimes = snapValues[cinema];
@@ -127,8 +136,7 @@ class App extends Component {
     cinemasRef.child(_cinemaName).set(newCinema);
 
     this.setState({
-      movieName: "",
-      movieDuration: "",
+      cinemaName: "",
       alert: { cinema: "Cinema added successfully", type: "success" }
     });
     this.setAlertTimeout();
@@ -176,6 +184,15 @@ class App extends Component {
   deleteCinema = ref => {
     let cinemaRef = firebase.database().ref(`cinemas/${ref}`);
     cinemaRef
+      .remove()
+      .then(function() {
+        console.log("Remove succeeded.");
+      })
+      .catch(function(error) {
+        console.log("Remove failed: " + error.message);
+      });
+    let showTimesRef = firebase.database().ref(`showTimes/${ref}`);
+    showTimesRef
       .remove()
       .then(function() {
         console.log("Remove succeeded.");

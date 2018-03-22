@@ -11,9 +11,9 @@ const schedule = (openingTime, closingTime, movieDuration) => {
     hour: closingTime
   });
 
-  // if the closing time is after midnight, add one day to close
+  // if the closing time is between midnight and 3am, add one day to close
   //    .add(7, 'days');
-  if (close.isSameOrBefore(moment({ hour: "03:00" }))) {
+  if (close.hours() >= 0 && close.hours() <= 3) {
     close.add(1, "days");
   }
 
@@ -71,10 +71,6 @@ const fullSchedule = (
 export default {
   fullSchedule: fullSchedule
 };
-
-// console.log(tomorrow3AM.date());
-// let close = moment({ hour: "23:00" });
-// console.log(close.isBefore(tomorrow3AM));
 
 // Test Case #1
 // console.log(fullSchedule("11:00", "23:00", "10:30", "24:00", 86));
