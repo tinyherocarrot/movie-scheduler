@@ -69,25 +69,6 @@ const fullSchedule = (
   };
 };
 
-// This function takes two sets of opening/closing times,
-// and checks if they are valid opening/closing times.
-const validateNewCinema = (wkdyOpen, wkdyClose, wkndOpen, wkndClose) => {
-  let _wkdyOpen = moment({
-    hour: wkdyOpen
-  });
-  let _wkdyClose = moment({
-    hour: wkdyClose
-  });
-  let _wkndOpen = moment({
-    hour: wkndOpen
-  });
-  let _wkndClose = moment({
-    hour: wkndClose
-  });
-
-  return _wkdyOpen.isBefore(_wkdyClose) && _wkndOpen.isBefore(_wkndClose);
-};
-
 export default {
   fullSchedule: fullSchedule
 };

@@ -44,8 +44,9 @@ class App extends React.Component {
 
   componentDidMount = () => {
     const rootRef = firebase.database().ref();
+
+    // initialize onValue listener for cinemas
     const cinemaRef = rootRef.child("cinemas");
-    const showTimesRef = rootRef.child("showTimes");
     cinemaRef.on("value", snap => {
       let _cinemasList = snap.val();
       if (_cinemasList !== null) {
@@ -56,6 +57,9 @@ class App extends React.Component {
         });
       }
     });
+
+    // initialize onValue listener for showTimes
+    const showTimesRef = rootRef.child("showTimes");
     showTimesRef.on("value", snap => {
       let snapValues = snap.val();
       if (snapValues !== null) {
@@ -94,8 +98,13 @@ class App extends React.Component {
     this.setState({ [name]: value });
   };
 
-  handleTimeChange = e => {
-    console.log("line 103: ", e);
+  // clear alert message in state after 3 seconds
+  setAlertTimeout = () => {
+    setTimeout(() => {
+      this.setState({
+        alert: ""
+      });
+    }, 3000);
   };
 
   addNewCinema = () => {
@@ -119,11 +128,7 @@ class App extends React.Component {
       movieDuration: "",
       alert: { cinema: "Cinema added successfully", type: "success" }
     });
-    setTimeout(() => {
-      this.setState({
-        alert: ""
-      });
-    }, 3000);
+    this.setAlertTimeout();
   };
 
   addNewMovie = () => {
@@ -163,11 +168,7 @@ class App extends React.Component {
       movieDuration: "",
       alert: { showTimes: "Showtimes added successfully", type: "success" }
     });
-    setTimeout(() => {
-      this.setState({
-        alert: ""
-      });
-    }, 3000);
+    this.setAlertTimeout();
   };
 
   validateNewCinema = () => {
@@ -184,34 +185,31 @@ class App extends React.Component {
       hour: this.state.wkndClose
     });
     if (_wkdyClose.isAfter(moment({ hour: "00:00" }))) {
+      console.log(_wkdyClose.date());
       _wkdyClose.add(1, "days");
+      console.log(_wkdyClose.date());
     }
     if (_wkndClose.isAfter(moment({ hour: "00:00" }))) {
       _wkndClose.add(1, "days");
     }
 
-    // if cinema hours are invalid:
-    //  opening should be between 9am and closing time,
-    //  closing should be between opening time and 3am
+    // Check for invalid cinema hours:
+    //  9am <= opening_time < closing_time <= 3am
     if (
       !(
-        _wkdyOpen.isAfter(moment({ hour: "09:00" })) &&
+        _wkdyOpen.isSameOrAfter(moment({ hour: "09:00" })) &&
         _wkdyOpen.isBefore(_wkdyClose) &&
-        _wkdyClose.isBefore(moment({ hour: "03:00" }).add(1, "days")) &&
-        (_wkndOpen.isAfter(moment({ hour: "09:00" })) &&
+        _wkdyClose.isSameOrBefore(moment({ hour: "03:00" }).add(1, "days")) &&
+        (_wkndOpen.isSameOrAfter(moment({ hour: "09:00" })) &&
           _wkndOpen.isBefore(_wkndClose) &&
-          _wkndClose.isBefore(moment({ hour: "03:00" }).add(1, "days")))
+          _wkndClose.isSameOrBefore(moment({ hour: "03:00" }).add(1, "days")))
       )
     ) {
       // alert user invalid times
       this.setState({
         alert: { cinema: "Please enter valid cinema hours", type: "danger" }
       });
-      setTimeout(() => {
-        this.setState({
-          alert: ""
-        });
-      }, 3000);
+      this.setAlertTimeout();
       return false;
     }
     // if cinema name is empty
@@ -220,11 +218,7 @@ class App extends React.Component {
       this.setState({
         alert: { cinema: "Please enter a cinema name", type: "danger" }
       });
-      setTimeout(() => {
-        this.setState({
-          alert: ""
-        });
-      }, 3000);
+      this.setAlertTimeout();
       return false;
     }
     return true;
@@ -237,27 +231,19 @@ class App extends React.Component {
       this.setState({
         alert: { showTimes: "Please enter a movie name", type: "danger" }
       });
-      setTimeout(() => {
-        this.setState({
-          alert: ""
-        });
-      }, 3000);
+      this.setAlertTimeout();
       return false;
     }
     // if movie duration is not a number,
     if (isNaN(parseInt(this.state.movieDuration))) {
-      // alert the user invalid movie duration
+      // alert the user of invalid movie duration
       this.setState({
         alert: {
           showTimes: "Please enter a valid movie duration",
           type: "danger"
         }
       });
-      setTimeout(() => {
-        this.setState({
-          alert: ""
-        });
-      }, 3000);
+      this.setAlertTimeout();
       return false;
     }
     return true;
