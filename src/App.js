@@ -17,11 +17,7 @@ import FlexContainer from "./components/FlexContainer";
 import PageContainer from "./components/PageContainer";
 
 import AddMovieForm from "./components/AddMovieForm";
-
-import TimePicker from "./components/TimePicker";
-import TextInput from "./components/TextInput";
-import Button from "./components/Button";
-import Alert from "./components/Alert";
+import AddCinemaForm from "./components/AddCinemaForm";
 
 import API from "./util/API";
 
@@ -203,7 +199,7 @@ class App extends React.Component {
     }
 
     // Check for invalid cinema hours:
-    //  9am <= opening_time < closing_time <= 3am
+    //  (9am <= opening_time < closing_time <= 3am)
     if (
       !(
         _wkdyOpen.isSameOrAfter(moment({ hour: "09:00" })) &&
@@ -288,52 +284,16 @@ class App extends React.Component {
               handleFormSubmit={this.handleFormSubmit}
               state={this.state}
             />
-            {/* <form onSubmit={this.handleFormSubmit}>
-              <select
-                defaultValue={this.state.selectedCinema}
-                onChange={this.handleInputChange}
-                name="selectedCinema"
-              >
-                <option disabled="disabled" value="prompt">
-                  Please select a cinema
-                </option>
-                {Object.keys(this.state.cinemasList).map((cinema, i) => {
-                  return (
-                    <option key={i} value={cinema}>
-                      {cinema}
-                    </option>
-                  );
-                })}
-              </select>{" "}
-              <br />
-              <br />
-              Movie Name:<br />
-              <TextInput
-                type="text"
-                name="movieName"
-                value={this.state.movieName}
-                onChange={this.handleInputChange}
-              />
-              <br />
-              Duration: (min)<br />
-              <TextInput
-                type="text"
-                name="movieDuration"
-                value={this.state.movieDuration}
-                onChange={this.handleInputChange}
-              />
-              <br />
-              <Button onClick={this.handleFormSubmit} value="add-movie">
-                Add Movie
-              </Button>
-              <Alert type={this.state.alert.type}>
-                {this.state.alert.showTimes}
-              </Alert>
-            </form> */}
           </FormContainer>
           <FormContainer collapsed={false}>
             <h2>Add a New Cinema</h2>
-            <form onSubmit={this.handleFormSubmit}>
+            <AddCinemaForm
+              handleInputChange={this.handleInputChange}
+              handleFormSubmit={this.handleFormSubmit}
+              state={this.state}
+            />
+
+            {/* <form onSubmit={this.handleFormSubmit}>
               Cinema Name:<br />
               <TextInput
                 type="text"
@@ -360,7 +320,7 @@ class App extends React.Component {
               <Alert type={this.state.alert.type}>
                 {this.state.alert.cinema}
               </Alert>
-            </form>
+            </form> */}
           </FormContainer>
         </FlexContainer>
         <Container fill="true">
