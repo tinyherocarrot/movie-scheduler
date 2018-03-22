@@ -44,24 +44,21 @@ class App extends React.Component {
 
   componentDidMount = () => {
     const rootRef = firebase.database().ref();
-    rootRef.on("value", snap => {
-      if (snap.hasChild("cinemas")) {
+    const cinemaRef = rootRef.child("cinemas");
+    const showTimesRef = rootRef.child("showTimes");
+    cinemaRef.on("value", snap => {
+      let _cinemasList = snap.val();
+      if (_cinemasList !== null) {
         console.log("wow you have cinemas!");
-        let _cinemasList = snap.child("cinemas").val();
         this.setState({
           cinemasList: _cinemasList,
           selectedCinema: Object.keys(_cinemasList)[0]
         });
-      } else {
-        console.log("no cinemas found :(");
       }
-
-      if (snap.hasChild("showTimes")) {
-        console.log("wow you have showtimes!");
-        // writeShowTimes()
-        let snapValues = snap.child("showTimes").val();
-        console.log(snapValues);
-
+    });
+    showTimesRef.on("value", snap => {
+      let snapValues = snap.val();
+      if (snapValues !== null) {
         let data = {};
         Object.keys(snapValues).forEach((cinema, i) => {
           let cinemaShowTimes = snapValues[cinema];
@@ -85,13 +82,9 @@ class App extends React.Component {
             data[cinema].push(newRow);
           });
         });
-        console.log(data);
-
         this.setState({
           showTimes: data
         });
-      } else {
-        console.log("no showtimes found :(");
       }
     });
   };
@@ -190,9 +183,26 @@ class App extends React.Component {
     let _wkndClose = moment({
       hour: this.state.wkndClose
     });
+    if (_wkdyClose.isAfter(moment({ hour: "00:00" }))) {
+      _wkdyClose.add(1, "days");
+    }
+    if (_wkndClose.isAfter(moment({ hour: "00:00" }))) {
+      _wkndClose.add(1, "days");
+    }
 
-    // if cinema hours are invalid
-    if (!(_wkdyOpen.isBefore(_wkdyClose) && _wkndOpen.isBefore(_wkndClose))) {
+    // if cinema hours are invalid:
+    //  opening should be between 9am and closing time,
+    //  closing should be between opening time and 3am
+    if (
+      !(
+        _wkdyOpen.isAfter(moment({ hour: "09:00" })) &&
+        _wkdyOpen.isBefore(_wkdyClose) &&
+        _wkdyClose.isBefore(moment({ hour: "03:00" }).add(1, "days")) &&
+        (_wkndOpen.isAfter(moment({ hour: "09:00" })) &&
+          _wkndOpen.isBefore(_wkndClose) &&
+          _wkndClose.isBefore(moment({ hour: "03:00" }).add(1, "days")))
+      )
+    ) {
       // alert user invalid times
       this.setState({
         alert: { cinema: "Please enter valid cinema hours", type: "danger" }

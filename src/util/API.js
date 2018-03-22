@@ -1,16 +1,22 @@
-import moment from "moment";
-// var moment = require("moment"); // for backwards compability testing
+// import moment from "moment";
+var moment = require("moment"); // for backwards compability testing
 
 // This function takes in an opening and closing time, and duration of the movie,
 // and outputs an array of showtimes, as according to the cinema's guidelines (see below)
 const schedule = (openingTime, closingTime, movieDuration) => {
-  // hardcode opening and closing times, for now
+  // console.log("API line 8", openingTime, closingTime);
+
   let open = moment({
     hour: openingTime
   });
   let close = moment({
     hour: closingTime
   });
+  // if the closing time is after midnight, add one day to close
+  //    .add(7, 'days');
+  if (close.isAfter(moment({ hour: "00:00" }))) {
+    close.add(1, "days");
+  }
 
   let res = [];
   let currentTime = moment(close);
@@ -83,8 +89,7 @@ const validateNewCinema = (wkdyOpen, wkdyClose, wkndOpen, wkndClose) => {
 };
 
 export default {
-  fullSchedule: fullSchedule,
-  validateNewCinema: validateNewCinema
+  fullSchedule: fullSchedule
 };
 
 // Test Case #1
@@ -116,4 +121,6 @@ export default {
 // Hours of Operation
 // The theatre has the following hours of operation.
 // - Monday - Thursday 11am - 11pm. - Friday - Sunday 10:30 am - 12 am.
+// - (!) We will be assuming that the latest that a theatre will run is 3am, and the
+// earliest it will open is 9am.
 // ======================================================================================= //

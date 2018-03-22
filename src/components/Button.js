@@ -12,7 +12,7 @@ const Button = styled.button`
 
   &:hover {
     background: white;
-    color: black;
+    color: rgb(8, 10, 52);
     cursor: pointer;
   }
   &:focus {
