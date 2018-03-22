@@ -73,8 +73,8 @@ const columns = [
 const BodyRow = styled.tr`
   color: white;
   &:hover {
-    background: papayawhip !important;
-    color: rgb(8, 10, 52);
+    background: rgb(8, 10, 52) !important;
+    color: white;
     border-radius: 0.5em;
   }
 `;
@@ -85,9 +85,15 @@ const components = {
   }
 };
 
-const StyledTable = props => {
+const StyledTable = styled(Table)`
+  margin: 1rem;
+`;
+
+const _Table = props => {
   console.log(props);
-  return <Table columns={columns} components={components} data={props.data} />;
+  return (
+    <StyledTable columns={columns} components={components} data={props.data} />
+  );
 };
 
-export default StyledTable;
+export default _Table;

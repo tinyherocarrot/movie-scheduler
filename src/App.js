@@ -1,15 +1,18 @@
 import React from "react";
 
 import * as firebase from "firebase";
+import moment from "moment";
 
 import Table from "./components/Table";
+
 import Container from "./components/Container";
 import FormContainer from "./components/FormContainer";
 import FlexContainer from "./components/FlexContainer";
+import PageContainer from "./components/PageContainer";
 import TimePicker from "./components/TimePicker";
 import TextInput from "./components/TextInput";
 import Button from "./components/Button";
-import PageContainer from "./components/PageContainer";
+import Alert from "./components/Alert";
 
 import API from "./util/API";
 
@@ -36,7 +39,7 @@ class App extends React.Component {
     wkndClose: "12:00",
     cinemasList: {},
     showTimes: {},
-    isShowingModal: false
+    alert: ""
   };
 
   componentDidMount = () => {
@@ -68,7 +71,8 @@ class App extends React.Component {
             let _movie = cinemaShowTimes[movie];
 
             let newRow = {
-              name: _movie.movieName,
+              name: _movie.movieName.concat(`\n (${_movie.movieDuration}m)`),
+
               monday: _movie.showTimes.weekday.join(" \n "),
               tuesday: _movie.showTimes.weekday.join(" \n "),
               wednesday: _movie.showTimes.weekday.join(" \n "),
@@ -89,13 +93,6 @@ class App extends React.Component {
       } else {
         console.log("no showtimes found :(");
       }
-    });
-  };
-
-  handleCollapse = () => {
-    let collapsed = !this.state.newCinemaCollapsed;
-    this.setState({
-      newCinemaCollapsed: collapsed
     });
   };
 
@@ -123,6 +120,17 @@ class App extends React.Component {
       .child("cinemas");
     let _cinemaName = this.state.cinemaName;
     cinemasRef.child(_cinemaName).set(newCinema);
+
+    this.setState({
+      movieName: "",
+      movieDuration: "",
+      alert: { cinema: "Cinema added successfully", type: "success" }
+    });
+    setTimeout(() => {
+      this.setState({
+        alert: ""
+      });
+    }, 3000);
   };
 
   addNewMovie = () => {
@@ -156,45 +164,107 @@ class App extends React.Component {
       .child("showTimes");
     showTimesRef.child(_selectedCinema).push(newMovie);
 
-    // clear form
+    // clear form, and set success alert
     this.setState({
       movieName: "",
-      movieDuration: ""
+      movieDuration: "",
+      alert: { showTimes: "Showtimes added successfully", type: "success" }
     });
+    setTimeout(() => {
+      this.setState({
+        alert: ""
+      });
+    }, 3000);
   };
 
-  noCinemasFound = () => {
-    let rootRef = firebase.database().ref();
-    rootRef.child("cinemas").once("value", snapshot => {
-      return snapshot.val() === null;
+  validateNewCinema = () => {
+    let _wkdyOpen = moment({
+      hour: this.state.wkdyOpen
     });
+    let _wkdyClose = moment({
+      hour: this.state.wkdyClose
+    });
+    let _wkndOpen = moment({
+      hour: this.state.wkndOpen
+    });
+    let _wkndClose = moment({
+      hour: this.state.wkndClose
+    });
+
+    // if cinema hours are invalid
+    if (!(_wkdyOpen.isBefore(_wkdyClose) && _wkndOpen.isBefore(_wkndClose))) {
+      // alert user invalid times
+      this.setState({
+        alert: { cinema: "Please enter valid cinema hours", type: "danger" }
+      });
+      setTimeout(() => {
+        this.setState({
+          alert: ""
+        });
+      }, 3000);
+      return false;
+    }
+    // if cinema name is empty
+    if (!this.state.cinemaName) {
+      // alert user to enter a cinema name
+      this.setState({
+        alert: { cinema: "Please enter a cinema name", type: "danger" }
+      });
+      setTimeout(() => {
+        this.setState({
+          alert: ""
+        });
+      }, 3000);
+      return false;
+    }
+    return true;
+  };
+
+  validateNewMovie = () => {
+    // if movie name is empty,
+    if (!this.state.movieName) {
+      // alert the user invalid movie name
+      this.setState({
+        alert: { showTimes: "Please enter a movie name", type: "danger" }
+      });
+      setTimeout(() => {
+        this.setState({
+          alert: ""
+        });
+      }, 3000);
+      return false;
+    }
+    // if movie duration is not a number,
+    if (isNaN(parseInt(this.state.movieDuration))) {
+      // alert the user invalid movie duration
+      this.setState({
+        alert: {
+          showTimes: "Please enter a valid movie duration",
+          type: "danger"
+        }
+      });
+      setTimeout(() => {
+        this.setState({
+          alert: ""
+        });
+      }, 3000);
+      return false;
+    }
+    return true;
   };
 
   handleFormSubmit = event => {
     event.preventDefault();
     switch (event.target.value) {
-      case "add-cinema":
-        if (
-          API.validateNewCinema(
-            this.state.wkdyOpen,
-            this.state.wkdyClose,
-            this.state.wkndOpen,
-            this.state.wkndClose
-          )
-        ) {
-          if (this.state.cinemaName) {
-            this.addNewCinema();
-          } else {
-            // alert user to enter a cinema name
-            console.log("not a valid cinema name!");
-          }
-        } else {
-          // alert user invalid times
-          console.log("not a valid cinema time!");
+      case "add-movie":
+        if (this.validateNewMovie()) {
+          this.addNewMovie();
         }
         break;
-      case "add-movie":
-        this.addNewMovie();
+      case "add-cinema":
+        if (this.validateNewCinema()) {
+          this.addNewCinema();
+        }
         break;
       default:
         break;
@@ -246,6 +316,9 @@ class App extends React.Component {
               <Button onClick={this.handleFormSubmit} value="add-movie">
                 Add Movie
               </Button>
+              <Alert type={this.state.alert.type}>
+                {this.state.alert.showTimes}
+              </Alert>
             </form>
           </FormContainer>
           <FormContainer collapsed={false}>
@@ -272,9 +345,11 @@ class App extends React.Component {
               <TimePicker onChange={this.handleInputChange} name="wkndClose" />
               <br />
               <Button onClick={this.handleFormSubmit} value="add-cinema">
-                {" "}
                 Add Cinema
               </Button>
+              <Alert type={this.state.alert.type}>
+                {this.state.alert.cinema}
+              </Alert>
             </form>
           </FormContainer>
         </FlexContainer>
@@ -282,14 +357,20 @@ class App extends React.Component {
           {Object.keys(this.state.cinemasList).length ? (
             Object.keys(this.state.cinemasList).map((cinema, i) => {
               return (
-                <Container key={i}>
-                  <h3>{cinema} Showtimes</h3>
+                <FlexContainer key={i}>
+                  <h2>{cinema}</h2>
+                  <h5>
+                    MON-THU {this.state.cinemasList[cinema].wkdyOpen}-
+                    {this.state.cinemasList[cinema].wkdyClose}
+                    <br /> FRI-SUN {this.state.cinemasList[cinema].wkndOpen}-
+                    {this.state.cinemasList[cinema].wkndClose}
+                  </h5>
                   {Object.keys(this.state.cinemasList).length ? (
                     <Table data={this.state.showTimes[cinema]} />
                   ) : (
                     `No showtimes yet for ${cinema}`
                   )}
-                </Container>
+                </FlexContainer>
               );
             })
           ) : (

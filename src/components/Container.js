@@ -1,6 +1,7 @@
+import React from "react";
 import styled from "styled-components";
 
-const Container = styled.div`
+const StyledContainer = styled.div`
   margin: 1em 1em;
   padding: 1em;
   background: ${props =>
@@ -9,4 +10,4 @@ const Container = styled.div`
   text-align: center;
 `;
 
-export default Container;
+export default StyledContainer;

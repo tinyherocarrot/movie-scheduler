@@ -10,6 +10,7 @@ const format = "H:mm";
 const StyledTimePicker = styled(TimePicker)`
   color: black !important;
   margin: 0.5em;
+  font-size: 1em !important;
 `;
 
 class MyTimePicker extends Component {

@@ -1,11 +1,16 @@
+import React from "react";
 import styled from "styled-components";
 
-const FlexContainer = styled.div`
+const StyledFlexContainer = styled.div`
   width: 100%;
-  padding: 0.5em;
   background: transparent;
   display: flex;
   flex-direction: row;
+  justify-content: space-around;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
-export default FlexContainer;
+export default StyledFlexContainer;

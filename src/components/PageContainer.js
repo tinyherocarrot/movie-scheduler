@@ -1,7 +1,8 @@
+import React from "react";
 import styled from "styled-components";
 
-const PageContainer = styled.div`
+const StyledPageContainer = styled.div`
   padding: 1em;
 `;
 
-export default PageContainer;
+export default StyledPageContainer;
