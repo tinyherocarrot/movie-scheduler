@@ -31,3 +31,10 @@ h5 {
   font-size: 1.1em;
   font-weight: lighter;
 }
+a {
+  color: red;
+}
+a:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}

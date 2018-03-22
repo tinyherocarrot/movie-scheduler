@@ -1,9 +1,7 @@
-import React from "react";
+import React, { Component } from "react";
 
 import * as firebase from "firebase";
 import moment from "moment";
-
-import Table from "./components/Table";
 
 // import {
 // Container,
@@ -11,13 +9,13 @@ import Table from "./components/Table";
 // FlexContainer,
 // PageContainer
 // } from "./components/Containers";
-import Container from "./components/Container";
 import FormContainer from "./components/FormContainer";
 import FlexContainer from "./components/FlexContainer";
 import PageContainer from "./components/PageContainer";
 
 import AddMovieForm from "./components/AddMovieForm";
 import AddCinemaForm from "./components/AddCinemaForm";
+import ShowtimesDisplay from "./components/ShowtimesDisplay";
 
 import API from "./util/API";
 
@@ -32,7 +30,7 @@ var config = {
 };
 firebase.initializeApp(config);
 
-class App extends React.Component {
+class App extends Component {
   state = {
     movieName: "",
     movieDuration: "",
@@ -144,7 +142,6 @@ class App extends React.Component {
     }
     // access to cinema's hours
     let cinemaHours = this.state.cinemasList[_selectedCinema];
-    console.log("here are the selected cinema's hours", cinemaHours);
 
     // capture form data, create newMovie obj
     let newMovie = {
@@ -155,7 +152,7 @@ class App extends React.Component {
         cinemaHours.wkdyClose,
         cinemaHours.wkndOpen,
         cinemaHours.wkndClose,
-        parseInt(this.state.movieDuration)
+        parseInt(this.state.movieDuration, 10)
       )
     };
     console.log(newMovie);
@@ -176,6 +173,18 @@ class App extends React.Component {
     this.setAlertTimeout();
   };
 
+  deleteCinema = ref => {
+    let cinemaRef = firebase.database().ref(`cinemas/${ref}`);
+    cinemaRef
+      .remove()
+      .then(function() {
+        console.log("Remove succeeded.");
+      })
+      .catch(function(error) {
+        console.log("Remove failed: " + error.message);
+      });
+  };
+
   validateNewCinema = () => {
     let _wkdyOpen = moment({
       hour: this.state.wkdyOpen
@@ -189,25 +198,35 @@ class App extends React.Component {
     let _wkndClose = moment({
       hour: this.state.wkndClose
     });
-    if (_wkdyClose.isAfter(moment({ hour: "00:00" }))) {
-      console.log(_wkdyClose.date());
+
+    // if the inputed closing hours are between midnight and 3am, increment the day
+    if (_wkdyClose.hours() >= 0 && _wkdyClose.hours() <= 3) {
       _wkdyClose.add(1, "days");
-      console.log(_wkdyClose.date());
+      console.log("_wkdyClose was incrememtned");
     }
-    if (_wkndClose.isAfter(moment({ hour: "00:00" }))) {
+    if (_wkndClose.hours() >= 0 && _wkndClose.hours() <= 3) {
       _wkndClose.add(1, "days");
+      console.log("_wkndClose was incrememtned");
     }
 
+    let today9AM = moment({ hour: "09:00" });
+    let tomorrow3AM = moment({ hour: "03:00" }).add(1, "days");
+    // console.log("case 1: ", _wkdyOpen.isSameOrAfter(today9AM));
+    // console.log("case 2: ", _wkdyOpen.isBefore(_wkdyClose));
+    // console.log("case 3: ", _wkdyClose.isSameOrBefore(tomorrow3AM));
+    // console.log("case 4: ", _wkndOpen.isSameOrAfter(today9AM));
+    // console.log("case 5: ", _wkndOpen.isBefore(_wkndClose));
+    // console.log("case 6: ", _wkndClose.isSameOrBefore(tomorrow3AM));
     // Check for invalid cinema hours:
     //  (9am <= opening_time < closing_time <= 3am)
     if (
       !(
-        _wkdyOpen.isSameOrAfter(moment({ hour: "09:00" })) &&
+        _wkdyOpen.isSameOrAfter(today9AM) &&
         _wkdyOpen.isBefore(_wkdyClose) &&
-        _wkdyClose.isSameOrBefore(moment({ hour: "03:00" }).add(1, "days")) &&
-        (_wkndOpen.isSameOrAfter(moment({ hour: "09:00" })) &&
+        _wkdyClose.isSameOrBefore(tomorrow3AM) &&
+        (_wkndOpen.isSameOrAfter(today9AM) &&
           _wkndOpen.isBefore(_wkndClose) &&
-          _wkndClose.isSameOrBefore(moment({ hour: "03:00" }).add(1, "days")))
+          _wkndClose.isSameOrBefore(tomorrow3AM))
       )
     ) {
       // alert user invalid times
@@ -240,7 +259,7 @@ class App extends React.Component {
       return false;
     }
     // if movie duration is not a number,
-    if (isNaN(parseInt(this.state.movieDuration))) {
+    if (isNaN(parseInt(this.state.movieDuration, 10))) {
       // alert the user of invalid movie duration
       this.setState({
         alert: {
@@ -292,61 +311,9 @@ class App extends React.Component {
               handleFormSubmit={this.handleFormSubmit}
               state={this.state}
             />
-
-            {/* <form onSubmit={this.handleFormSubmit}>
-              Cinema Name:<br />
-              <TextInput
-                type="text"
-                name="cinemaName"
-                value={this.state.cinemaName}
-                onChange={this.handleInputChange}
-              />
-              <br />
-              Weekday Opening Time: <br />
-              <TimePicker onChange={this.handleInputChange} name="wkdyOpen" />
-              <br />
-              Weekday Closing Time: <br />
-              <TimePicker onChange={this.handleInputChange} name="wkdyClose" />
-              <br />
-              Weekend Opening Time: <br />
-              <TimePicker onChange={this.handleInputChange} name="wkndOpen" />
-              <br />
-              Weekend Closing Time: <br />
-              <TimePicker onChange={this.handleInputChange} name="wkndClose" />
-              <br />
-              <Button onClick={this.handleFormSubmit} value="add-cinema">
-                Add Cinema
-              </Button>
-              <Alert type={this.state.alert.type}>
-                {this.state.alert.cinema}
-              </Alert>
-            </form> */}
           </FormContainer>
         </FlexContainer>
-        <Container fill="true">
-          {Object.keys(this.state.cinemasList).length ? (
-            Object.keys(this.state.cinemasList).map((cinema, i) => {
-              return (
-                <FlexContainer key={i}>
-                  <h2>{cinema}</h2>
-                  <h5>
-                    MON-THU {this.state.cinemasList[cinema].wkdyOpen}-
-                    {this.state.cinemasList[cinema].wkdyClose}
-                    <br /> FRI-SUN {this.state.cinemasList[cinema].wkndOpen}-
-                    {this.state.cinemasList[cinema].wkndClose}
-                  </h5>
-                  {Object.keys(this.state.cinemasList).length ? (
-                    <Table data={this.state.showTimes[cinema]} />
-                  ) : (
-                    `No showtimes yet for ${cinema}`
-                  )}
-                </FlexContainer>
-              );
-            })
-          ) : (
-            <p>Add a cinema to begin</p>
-          )}
-        </Container>
+        <ShowtimesDisplay state={this.state} deleteCinema={this.deleteCinema} />
       </PageContainer>
     );
   }

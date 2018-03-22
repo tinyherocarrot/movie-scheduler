@@ -59,15 +59,15 @@ const columns = [
     key: "sunday",
     width: 50,
     align: "center"
-  },
-  {
-    title: "Options",
-    dataIndex: "",
-    key: "options",
-    align: "center",
-    width: 100,
-    render: () => <a href="#">Remove</a>
   }
+  // {
+  //   title: "Options",
+  //   dataIndex: "",
+  //   key: "options",
+  //   align: "center",
+  //   width: 100,
+  //   render: () => <a href="#">Remove</a>
+  // }
 ];
 
 const BodyRow = styled.tr`
@@ -86,14 +86,15 @@ const components = {
 };
 
 const StyledTable = styled(Table)`
-  margin: 1rem;
+  margin: 2rem;
 `;
 
-const _Table = props => {
-  console.log(props);
+const MyTable = props => {
+  // let movieName = props.data.name.split("(")[0];
+  console.log("movie name", props.data);
   return (
     <StyledTable columns={columns} components={components} data={props.data} />
   );
 };
 
-export default _Table;
+export default MyTable;

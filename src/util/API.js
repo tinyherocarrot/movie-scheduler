@@ -72,6 +72,10 @@ export default {
   fullSchedule: fullSchedule
 };
 
+// console.log(tomorrow3AM.date());
+// let close = moment({ hour: "23:00" });
+// console.log(close.isBefore(tomorrow3AM));
+
 // Test Case #1
 // console.log(fullSchedule("11:00", "23:00", "10:30", "24:00", 86));
 // ---> expected output: { weekday: [ '13:10', '15:15', '17:20', '19:25', '21:30' ],
