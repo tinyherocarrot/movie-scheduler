@@ -4,17 +4,16 @@ var moment = require("moment"); // for backwards compability testing
 // This function takes in an opening and closing time, and duration of the movie,
 // and outputs an array of showtimes, as according to the cinema's guidelines (see below)
 const schedule = (openingTime, closingTime, movieDuration) => {
-  // console.log("API line 8", openingTime, closingTime);
-
   let open = moment({
     hour: openingTime
   });
   let close = moment({
     hour: closingTime
   });
+
   // if the closing time is after midnight, add one day to close
   //    .add(7, 'days');
-  if (close.isAfter(moment({ hour: "00:00" }))) {
+  if (close.isSameOrBefore(moment({ hour: "03:00" }))) {
     close.add(1, "days");
   }
 
@@ -74,17 +73,11 @@ export default {
 };
 
 // Test Case #1
-// console.log(fullSchedule(11, 23, 10.5, 24, 86));
+// console.log(fullSchedule("11:00", "23:00", "10:30", "24:00", 86));
 // ---> expected output: { weekday: [ '13:10', '15:15', '17:20', '19:25', '21:30' ],
 //                         weekend: [ '12:05', '14:10', '16:15', '18:20', '20:25', '22:30' ] }
 
 // Test Case #2
-// console.log(validateNewCinema(11, 23, 10.5, 24));
-// ---> expected output: true
-
-// Test Case #2
-// console.log(validateNewCinema(11, 11, 10.5, 10));
-// ---> expected output: false
 
 // ====================================  Requirements ==================================== //
 // - Each movie should start at easy to read times (eg 10:00, 10:05, 10:10).

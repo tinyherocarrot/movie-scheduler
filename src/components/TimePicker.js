@@ -5,7 +5,7 @@ import TimePicker from "rc-time-picker";
 import moment from "moment";
 import styled from "styled-components";
 
-const format = "H:mm";
+const format = "HH:mm";
 
 const StyledTimePicker = styled(TimePicker)`
   color: black !important;

@@ -5,10 +5,19 @@ import moment from "moment";
 
 import Table from "./components/Table";
 
+// import {
+// Container,
+// FormContainer,
+// FlexContainer,
+// PageContainer
+// } from "./components/Containers";
 import Container from "./components/Container";
 import FormContainer from "./components/FormContainer";
 import FlexContainer from "./components/FlexContainer";
 import PageContainer from "./components/PageContainer";
+
+import AddMovieForm from "./components/AddMovieForm";
+
 import TimePicker from "./components/TimePicker";
 import TextInput from "./components/TextInput";
 import Button from "./components/Button";
@@ -274,7 +283,12 @@ class App extends React.Component {
         <FlexContainer>
           <FormContainer>
             <h2>Add a New Movie</h2>
-            <form onSubmit={this.handleFormSubmit}>
+            <AddMovieForm
+              handleInputChange={this.handleInputChange}
+              handleFormSubmit={this.handleFormSubmit}
+              state={this.state}
+            />
+            {/* <form onSubmit={this.handleFormSubmit}>
               <select
                 defaultValue={this.state.selectedCinema}
                 onChange={this.handleInputChange}
@@ -315,7 +329,7 @@ class App extends React.Component {
               <Alert type={this.state.alert.type}>
                 {this.state.alert.showTimes}
               </Alert>
-            </form>
+            </form> */}
           </FormContainer>
           <FormContainer collapsed={false}>
             <h2>Add a New Cinema</h2>
