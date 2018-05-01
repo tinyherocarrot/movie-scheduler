@@ -20,7 +20,7 @@ import ShowtimesDisplay from "./components/ShowtimesDisplay";
 import API from "./util/API";
 
 // Initialize Firebase
-var config = {
+const config = {
   apiKey: "AIzaSyAfE4ydC1Zk-UAQWnZnhS7bCeRWeG0V3LU",
   authDomain: "movie-schedule-automate.firebaseapp.com",
   databaseURL: "https://movie-schedule-automate.firebaseio.com",
